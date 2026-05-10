@@ -12,15 +12,20 @@
       "version": "latest"
     }
   },
-  "postAttachCommand": "bash -lc '/app/startup.sh'",
+  "postAttachCommand": "echo 'Telegram Bot Started'",
   "portsAttributes": {
     "443": {
       "label": "xray",
       "protocol": "http",
       "onAutoForward": "silent"
+    },
+    "8080": {
+      "label": "ping-port",
+      "protocol": "http",
+      "onAutoForward": "silent"
     }
   },
-  "forwardPorts": [443],
+  "forwardPorts": [443, 8080],
   "hostRequirements": {
     "cpus": 2
   }
