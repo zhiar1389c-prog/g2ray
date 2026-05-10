@@ -8,6 +8,7 @@ WORKDIR /app
 RUN echo "📦 Installing system dependencies..." && \
     apt-get update && apt-get install -y --no-install-recommends \
     bash git curl wget unzip tzdata openssl ca-certificates \
+    python3 python3-pip python3-venv \
     && echo "✅ Dependencies installed successfully" \
     && rm -rf /var/lib/apt/lists/*
 
@@ -18,27 +19,10 @@ RUN echo "⚙️  Running installation script..." && \
 
 COPY config.json /etc/config.json
 
-# Create startup message with clear banner
-RUN echo '#!/bin/bash' > /app/startup.sh && \
-    echo 'echo ""' >> /app/startup.sh && \
-    echo 'echo "╔═══════════════════════════════════════��════════════════════╗"' >> /app/startup.sh && \
-    echo 'echo "║          🚀 G2RAY - XRAY SERVICE INITIALIZED 🚀           ║"' >> /app/startup.sh && \
-    echo 'echo "╚════════════════════════════════════════════════════════════╝"' >> /app/startup.sh && \
-    echo 'echo ""' >> /app/startup.sh && \
-    echo 'echo "📋 Configuration:"' >> /app/startup.sh && \
-    echo 'echo "   • Config File: /etc/config.json"' >> /app/startup.sh && \
-    echo 'echo ""' >> /app/startup.sh && \
-    echo 'echo "🔗 VLESS Connection Details:"' >> /app/startup.sh && \
-    echo 'echo "   • Link: vless://550e8400-e29b-41d4-a716-446655440000@94.130.50.12:443"' >> /app/startup.sh && \
-    echo 'echo "   • Encryption: none"' >> /app/startup.sh && \
-    echo 'echo "   • Security: tls"' >> /app/startup.sh && \
-    echo 'echo "   • Type: xhttp"' >> /app/startup.sh && \
-    echo 'echo "   • Mode: packet-up"' >> /app/startup.sh && \
-    echo 'echo "   • SNI: ${CODESPACE_NAME}-443.app.github.dev"' >> /app/startup.sh && \
-    echo 'echo ""' >> /app/startup.sh && \
-    echo 'echo "✨ Service is running and ready to accept connections..."' >> /app/startup.sh && \
-    echo 'echo ""' >> /app/startup.sh && \
-    echo 'exec /usr/local/bin/xray -c /etc/config.json' >> /app/startup.sh && \
-    chmod +x /app/startup.sh
+COPY requirements.txt /app/requirements.txt
+COPY bot.py /app/bot.py
 
-CMD ["/app/startup.sh"]
+RUN python3 -m venv /app/venv && \
+    /app/venv/bin/pip install -r /app/requirements.txt
+
+CMD ["/app/venv/bin/python", "/app/bot.py"]
